@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>每日一盘</title>
+<meta name="description" content="每天 15 分钟的珠心算训练：口诀、珠像、闪算、乘法，按正确率自动调整难度。">
+<meta name="theme-color" content="#F3F4F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1118" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="每日一盘">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<style>
+/* 版式：教练式的一页仪表。顶部是今天的训练单，中部五条能力轨道，底部路线与手册。安静、克制，只有群青一种强调色 */
+:root {
+  --bg: #F3F4F7;
+  --surface: #FFFFFF;
+  --surface-2: #E7E9F0;
+  --ink: #161A26;
+  --muted: #646B80;
+  --accent: #2C47C9;      /* 群青 */
+  --accent-soft: #DDE3FA;
+  --accent-ink: #FFFFFF;
+  --good: #1F8A5B;
+  --warn: #B7791F;
+  --bad: #C2413A;
+  --frame: #20232E;
+  --well: #F7F7F4;
+  --rod: #B9BCC6;
+  --bead: #2B2F3C;
+  --bead-on: #2C47C9;
+  --line: rgba(22, 26, 38, .1);
+  --f-display: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --f-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --f-num: "Space Grotesk", "Noto Sans SC", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1118; --surface: #171A24; --surface-2: #232736; --ink: #E8EAF2; --muted: #9298AC;
+    --accent: #7D93F5; --accent-soft: #232C55; --accent-ink: #0F1118; --good: #4CC48B; --warn: #E2A84B; --bad: #EE7A72;
+    --frame: #0A0B10; --well: #1D2030; --rod: #3E4357; --bead: #555B70; --bead-on: #7D93F5; --line: rgba(232, 234, 242, .1); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1118; --surface: #171A24; --surface-2: #232736; --ink: #E8EAF2; --muted: #9298AC;
+  --accent: #7D93F5; --accent-soft: #232C55; --accent-ink: #0F1118; --good: #4CC48B; --warn: #E2A84B; --bad: #EE7A72;
+  --frame: #0A0B10; --well: #1D2030; --rod: #3E4357; --bead: #555B70; --bead-on: #7D93F5; --line: rgba(232, 234, 242, .1); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 540px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num { font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+
+header { padding-block: 22px 6px; display: flex; justify-content: space-between; align-items: end; gap: 12px; }
+header h1 { margin: 0; font-weight: 900; font-size: 24px; letter-spacing: .02em; }
+header p { margin: 0; color: var(--muted); font-size: 13px; }
+.day { text-align: right; }
+.day b { font-family: var(--f-num); font-size: 30px; line-height: 1; display: block; }
+.day span { font-size: 12px; color: var(--muted); }
+
+section { margin-block: 18px; }
+.eyebrow { font-size: 12px; letter-spacing: .14em; color: var(--muted); font-weight: 500; margin-bottom: 8px; }
+
+/* 今日训练单 */
+.plan { background: var(--surface); border-radius: 18px; border: 1px solid var(--line); overflow: hidden; }
+.plan-head { padding: 16px 16px 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.plan-head h2 { margin: 0; font-size: 19px; font-weight: 700; }
+.plan-head span { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.blocks { list-style: none; margin: 0; padding: 0; }
+.blocks li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 10px 16px; border-top: 1px solid var(--line); }
+.blocks li .n { width: 24px; height: 24px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font-family: var(--f-num); font-size: 12px; font-weight: 700; }
+.blocks li.done .n { background: var(--good); color: #fff; }
+.blocks li b { font-weight: 500; }
+.blocks li small { display: block; color: var(--muted); font-size: 12px; }
+.blocks li .lv { font-family: var(--f-num); font-size: 12px; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 99px; }
+.btn { border: 0; border-radius: 12px; padding: 13px 18px; font-weight: 700; cursor: pointer; background: var(--accent); color: var(--accent-ink); font-size: 16px; }
+.btn.wide { width: 100%; }
+.btn.ghost { background: var(--surface-2); color: var(--ink); }
+.plan .btn { margin: 4px 16px 16px; width: calc(100% - 32px); }
+
+/* 热力条 */
+.heat { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; }
+.heat i { aspect-ratio: 1; max-width: 100%; border-radius: 4px; background: var(--surface-2); }
+.heat i.l1 { background: color-mix(in srgb, var(--accent) 35%, var(--surface-2)); }
+.heat i.l2 { background: color-mix(in srgb, var(--accent) 65%, var(--surface-2)); }
+.heat i.l3 { background: var(--accent); }
+.heat i.today { outline: 2px solid var(--ink); outline-offset: 1px; }
+.heat-cap { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* 能力轨道 */
+.tracks { display: grid; gap: 10px; }
+.track { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 6px; }
+.track .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.track .top b { font-weight: 700; }
+.track .top span { font-size: 12px; color: var(--muted); }
+.steps { display: flex; gap: 3px; }
+.steps i { flex: 1; height: 6px; border-radius: 2px; background: var(--surface-2); }
+.steps i.on { background: var(--accent); }
+.track .now { font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.track .now button { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; font-size: 13px; font-weight: 500; }
+.track.locked { opacity: .55; }
+
+/* 路线 */
+.phases { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.phase { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px; min-width: 0; }
+.phase b { display: block; font-size: 14px; }
+.phase span { display: block; font-size: 11px; color: var(--muted); line-height: 1.4; }
+.phase.cur { border-color: var(--accent); background: var(--accent-soft); }
+.phase .wk { font-family: var(--f-num); font-size: 11px; color: var(--accent); }
+.note { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+/* 手册 */
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 0 14px; margin-bottom: 8px; }
+summary { cursor: pointer; padding: 12px 0; font-weight: 700; list-style: none; display: flex; justify-content: space-between; }
+summary::after { content: "+"; color: var(--muted); }
+details[open] summary::after { content: "−"; }
+.tbl-wrap { overflow-x: auto; padding-bottom: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; }
+td.r { color: var(--accent); font-weight: 500; }
+details p { margin: 0 0 12px; font-size: 14px; }
+.foot { padding-block: 10px 40px; display: flex; gap: 8px; flex-wrap: wrap; }
+.foot button { background: none; border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; font-size: 12px; color: var(--muted); cursor: pointer; }
+
+.linkbtn { display: block; width: calc(100% - 32px); margin: -6px 16px 14px; background: none; border: 0; color: var(--accent); font-size: 13px; cursor: pointer; padding: 4px; }
+.spark { display: flex; align-items: end; gap: 12px; margin-top: 2px; }
+.spark svg { flex: none; max-width: 60%; height: auto; }
+.spark rect { fill: color-mix(in srgb, var(--accent) 55%, var(--surface-2)); }
+.spark rect.hi { fill: var(--accent); }
+.spark rect.lo { fill: color-mix(in srgb, var(--bad) 70%, var(--surface-2)); }
+.spark .goal { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; opacity: .6; }
+.spark > span { font-size: 11px; color: var(--muted); line-height: 1.4; min-width: 0; }
+.spark > span b { font-size: 15px; color: var(--ink); }
+.spark-empty { font-size: 12px; color: var(--muted); }
+
+.backup { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
+.backup p { margin: 0; font-size: 13px; color: var(--muted); }
+.backup textarea { width: 100%; font-family: ui-monospace, monospace; font-size: 12px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); resize: vertical; word-break: break-all; }
+.bk-msg { font-size: 13px; color: var(--accent); min-height: 1.4em; margin-block: 6px; }
+#bkPanel { display: grid; gap: 4px; }
+#bkPanel[hidden] { display: none; }
+
+/* 演示与回放 */
+.demo { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px; display: grid; gap: 8px; }
+.demo .k { font-size: 12px; letter-spacing: .14em; color: var(--accent); font-weight: 700; display: flex; justify-content: space-between; }
+.demo-cap { text-align: center; font-family: var(--f-num); font-size: 18px; font-weight: 700; min-height: 1.6em; }
+.demo-cap small { display: block; font-family: var(--f-body); font-weight: 400; font-size: 13px; color: var(--muted); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hidden-ab .zsx-abacus { visibility: hidden; }
+
+/* 训练层 */
+.layer { position: fixed; inset: 0; background: var(--bg); z-index: 20; overflow-y: auto; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.t-top { display: flex; align-items: center; gap: 12px; padding-block: 12px; }
+.t-top .x { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 17px; flex: none; }
+.segs { flex: 1; display: flex; gap: 4px; }
+.segs i { flex: 1; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; position: relative; }
+.segs i.done { background: var(--good); }
+.segs i.cur::after { content: ""; position: absolute; inset: 0; width: var(--p, 0%); background: var(--accent); transition: width .25s; }
+.t-stage { display: grid; gap: 14px; padding-bottom: 24px; }
+.intro { background: var(--surface); border-radius: 18px; border: 1px solid var(--line); padding: 18px; display: grid; gap: 8px; }
+.intro .k { font-size: 12px; letter-spacing: .14em; color: var(--accent); font-weight: 700; }
+.intro h2 { margin: 0; font-size: 22px; text-wrap: balance; }
+.intro p { margin: 0; color: var(--ink); }
+.intro ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+.q { text-align: center; }
+.q .meta { font-size: 12px; color: var(--muted); letter-spacing: .1em; }
+.q .big { font-family: var(--f-num); font-weight: 700; font-size: 46px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.q .sub { color: var(--accent); min-height: 1.6em; font-weight: 500; }
+.vstack { display: inline-grid; justify-items: end; font-family: var(--f-num); font-weight: 700; font-size: 32px; line-height: 1.25; font-variant-numeric: tabular-nums; padding: 4px 18px; border-bottom: 2px solid var(--ink); }
+.flashbox { height: 120px; display: grid; place-items: center; font-family: var(--f-num); font-weight: 700; font-size: 66px; font-variant-numeric: tabular-nums; }
+.flashbox.neg { color: var(--bad); } .flashbox.ask { color: var(--muted); }
+.pop { animation: pop .16s ease-out; }
+@keyframes pop { from { transform: scale(.85); opacity: .3; } to { transform: none; opacity: 1; } }
+.fb { text-align: center; font-weight: 700; min-height: 1.6em; }
+.fb.ok { color: var(--good); } .fb.no { color: var(--bad); }
+.summary { display: grid; gap: 8px; }
+.summary .row { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; gap: 10px; }
+.summary .row .chg { font-family: var(--f-num); font-weight: 700; font-size: 13px; }
+.chg.up { color: var(--good); } .chg.down { color: var(--bad); } .chg.same { color: var(--muted); }
+
+/* 算盘（极简黑） */
+.ab-host { display: flex; justify-content: center; }
+.zsx-abacus { width: 100%; height: auto; display: block; touch-action: manipulation; user-select: none; }
+.ab-frame { fill: var(--frame); }
+.ab-well { fill: var(--well); }
+.ab-rod { stroke: var(--rod); stroke-width: 2.5; }
+.ab-beam { fill: var(--frame); }
+.ab-dot { fill: var(--well); }
+.ab-bead { transition: transform .13s ease-out; }
+.interactive .ab-bead { cursor: pointer; }
+.ab-bead-body { fill: var(--bead); }
+.ab-bead.on .ab-bead-body { fill: var(--bead-on); }
+.ab-bead-shine { fill: #fff; opacity: .18; }
+.ab-bead-seam { stroke: #000; stroke-opacity: .2; }
+.ab-label { fill: var(--muted); font-size: 12px; font-family: var(--f-body); }
+.ab-tools { display: flex; justify-content: center; gap: 8px; }
+.ab-tools button { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 14px; cursor: pointer; font-size: 13px; }
+
+.zsx-kp { display: grid; gap: 10px; }
+.kp-display { text-align: center; font-family: var(--f-num); font-size: 30px; font-weight: 700; min-height: 52px; padding: 6px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.kp-display.empty { color: var(--muted); font-size: 15px; font-family: var(--f-body); font-weight: 400; display: grid; place-items: center; }
+.kp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kp-grid button { height: 52px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 22px; font-family: var(--f-num); font-weight: 700; cursor: pointer; touch-action: manipulation; }
+.kp-grid button:active { background: var(--surface-2); }
+.kp-grid .kp-ok { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .ab-bead, .segs i.cur::after { transition: none; } .pop { animation: none; } }
+</style>
+<style>
+/* 发布环境的基础重置（Artifact 外壳原本提供） */
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+.install { display: grid; gap: 8px; background: var(--accent-soft); border-radius: 14px; padding: 14px; margin-top: 18px; }
+.install p { margin: 0; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="home">
+  <div class="wrap">
+    <header><div><h1>每日一盘</h1><p>每天 15 分钟，系统按你的水平排课</p></div><div class="day"><b id="streak">0</b><span>连续天数</span></div></header>
+
+    <section>
+      <div class="plan">
+        <div class="plan-head"><h2 id="planTitle">今日训练</h2><span id="planTime"></span></div>
+        <ul class="blocks" id="blocks"></ul>
+        <button class="btn" id="start">开始今天的训练</button>
+        <button class="linkbtn" id="place">学过一点珠算？先做 5 分钟定级测试</button>
+      </div>
+    </section>
+
+
+    <div class="install" id="install" hidden>
+      <p id="installTxt"></p>
+      <button class="btn wide" id="installBtn" hidden>安装到手机</button>
+    </div>
+
+    <section>
+      <div class="eyebrow">最近 28 天</div>
+      <div class="heat" id="heat"></div>
+      <div class="heat-cap"><span>4 周前</span><span>今天</span></div>
+    </section>
+
+    <section>
+      <div class="eyebrow">五条能力轨道 · 每块训练正确率 ≥ 90% 升一级，< 60% 降一级</div>
+      <div class="tracks" id="tracks"></div>
+    </section>
+
+    <section>
+      <div class="eyebrow">训练路线（每天 15–20 分钟）</div>
+      <div class="phases" id="phases"></div>
+      <p class="note" id="eta"></p>
+    </section>
+
+    <section>
+      <div class="eyebrow">口诀手册</div>
+      <details><summary>四类方法是什么</summary>
+        <p><b>直接拨</b>：本档珠子够用，直接加上或拨去。</p>
+        <p><b>五的补数</b>（1↔4、2↔3）：下珠不够时，用上珠凑。加 4 = 加 5 减 1。</p>
+        <p><b>十的补数</b>（1↔9、2↔8、3↔7、4↔6、5↔5）：满十进一、不够借一。加 8 = 进 1 减 2。</p>
+        <p><b>破五进十 / 退十补五</b>：十的补数里又需要五的补数。如 6 + 7：要“去 3 进 1”，下珠不够去 3，于是“上 2 去 5”再进 1。</p>
+      </details>
+      <details><summary>加法口诀表</summary><div class="tbl-wrap" id="tblAdd"></div></details>
+      <details><summary>减法口诀表</summary><div class="tbl-wrap" id="tblSub"></div></details>
+    </section>
+    <section>
+      <div class="eyebrow">进度备份</div>
+      <div class="backup">
+        <p>进度只存在这台设备上。换手机、清理浏览器之前，先复制备份码存好；到新设备上粘贴即可恢复。</p>
+        <div class="row2"><button class="btn ghost" id="bkOut">复制备份码</button><button class="btn ghost" id="bkIn">粘贴恢复</button></div>
+        <div id="bkPanel" hidden>
+          <textarea id="bkText" rows="4" spellcheck="false" aria-label="备份码"></textarea>
+          <div class="bk-msg" id="bkMsg"></div>
+          <button class="btn wide" id="bkDo" hidden>用这个备份码恢复</button>
+        </div>
+      </div>
+    </section>
+    <div class="foot"><button id="mute"></button><button id="reset">清空记录</button></div>
+  </div>
+</div>
+
+<div id="train" class="layer" hidden>
+  <div class="wrap">
+    <div class="t-top"><button class="x" id="quit" aria-label="结束训练">×</button><div class="segs" id="segs"></div></div>
+    <div class="t-stage" id="tstage"></div>
+  </div>
+</div>
+
+<script src="abacus-core.js?v=ac827dcf"></script>
+<script>
+(function () {
+  const Z = window.ZSX;
+  const $ = s => document.querySelector(s);
+  const h = html => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+
+  /* ===== 五条能力轨道，每级的参数 ===== */
+  const TRACKS = {
+    hand: { name: '拨珠手感', goal: '5 位数 3 秒内拨出', min: 3, levels: [1, 2, 3, 4, 5].map(d => ({ d, txt: `拨出 ${d} 位数` })),
+      tips: ['从最高位开始，一档一档往右拨', '拇指推下珠上去，食指拨下珠下来，上珠都用食指', '读数时看珠形，不要一颗一颗数'] },
+    rhyme: { name: '口诀反应', goal: '所有口诀无需思考', min: 4, levels: [
+      { m: ['direct'], txt: '直加直减' }, { m: ['direct', 'five'], f: ['five'], txt: '五的补数' }, { m: ['direct', 'five', 'ten'], f: ['ten'], txt: '十的补数' },
+      { m: ['direct', 'five', 'ten', 'mix'], f: ['mix'], txt: '破五进十 / 退十补五' }, { m: ['direct', 'five', 'ten', 'mix'], f: ['five', 'ten', 'mix'], txt: '混合 · 有口诀提示' }, { m: ['direct', 'five', 'ten', 'mix'], f: ['five', 'ten', 'mix'], txt: '混合 · 无提示', bare: true }],
+      tips: ['每一步先念口诀，再动手', '看到 +4 想“下五去一”，看到 +8 想“去二进一”', '熟练后口诀会消失，手指自己知道怎么拨'] },
+    image: { name: '珠像记忆', goal: '5 位珠像 1 秒记住', min: 4, levels: [[2, 1500], [3, 1500], [3, 1000], [4, 1500], [4, 1000], [5, 1500], [5, 1000], [6, 1000]].map(([d, ms]) => ({ d, ms, txt: `${d} 位 · ${ms / 1000} 秒` })),
+      tips: ['记形状，不读数字', '先看哪些档的上珠落下，再看下珠推上几颗', '珠像消失后，闭眼在脑中“看”它'] },
+    mental: { name: '心算', goal: '5 位数 3 笔', min: 3, levels: [
+      { d: 1, t: 3, ms: 1200 }, { d: 1, t: 5, ms: 1000 }, { d: 2, t: 2 }, { d: 2, t: 3, ms: 1400 }, { d: 1, t: 8, ms: 800 }, { d: 2, t: 4 }, { d: 3, t: 2 }, { d: 2, t: 5, ms: 1000 }, { d: 3, t: 3 }, { d: 4, t: 2 }, { d: 4, t: 3 }, { d: 5, t: 2 }, { d: 5, t: 3 }]
+      .map(x => Object.assign(x, { txt: `${x.d} 位 × ${x.t} 笔${x.ms ? ` · 闪算 ${x.ms / 1000}s` : ' · 看算式'}` })),
+      tips: ['脑中准备一把比题目多一档的算盘', '只保留盘面，前面的数字看过就忘', '算不出时允许手指在桌上虚拨'] },
+    mul: { name: '乘法', goal: '3 位 × 1 位心算', min: 0, levels: [
+      { a: 2, b: 1, board: true, txt: '2 位 × 1 位 · 上盘' }, { a: 3, b: 1, board: true, txt: '3 位 × 1 位 · 上盘' }, { a: 2, b: 2, board: true, txt: '2 位 × 2 位 · 上盘' }, { a: 2, b: 1, txt: '2 位 × 1 位 · 心算' }, { a: 3, b: 1, txt: '3 位 × 1 位 · 心算' }, { a: 2, b: 2, txt: '2 位 × 2 位 · 心算' }],
+      tips: ['拆位相乘：34×6 = 3×6 拨在十位起 + 4×6', '乘积从哪档起拨，看被乘的那一位', '九九表要背到脱口而出'] },
+  };
+  TRACKS.intro = { name: '入门课', goal: '', levels: [{ txt: '认识算盘，拨出第一批数' }],
+    tips: ['上珠一颗代表 5，下珠每颗代表 1', '珠子靠近横梁才算数，离开横梁就是 0', '最右一档是个位，往左是十位、百位'] };
+  const ORDER = ['hand', 'rhyme', 'image', 'mental', 'mul'];
+  const PROBE = { rhyme: 4, image: 3, mental: 3 }; // 定级测试用的级别
+
+  /* ===== 存档 ===== */
+  const fresh = () => ({ lv: { hand: 0, rhyme: 0, image: 0, mental: 0, mul: 0 }, days: {}, sessions: 0, seen: {}, hist: {}, intro: false });
+  let S = Object.assign(fresh(), Z.store('c-save', {}));
+  const persist = () => Z.save('c-save', S);
+  const dkey = d => d.toISOString().slice(0, 10);
+  const todayKey = () => dkey(new Date());
+  const unlocked = k => k === 'hand' || k === 'rhyme' || (k === 'image' && S.lv.hand >= 1) || (k === 'mental' && S.lv.rhyme >= 2) || (k === 'mul' && S.lv.mental >= 6);
+  const maxed = k => S.lv[k] >= TRACKS[k].levels.length - 1;
+
+  function streak() {
+    let n = 0; const d = new Date();
+    if (!S.days[dkey(d)]) d.setDate(d.getDate() - 1);
+    while (S.days[dkey(d)]) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+
+  // 今日训练：最多 4 块，弱项优先；已到顶的轨道只做维持
+  function todayPlan() {
+    if (!S.intro) return ['intro', 'hand', 'rhyme'];
+    const list = ORDER.filter(unlocked);
+    const growing = list.filter(k => !maxed(k));
+    const pickList = (growing.length ? growing : list).slice();
+    if (unlocked('hand') && S.lv.hand < 4 && !pickList.includes('hand')) pickList.unshift('hand');
+    // 热身永远放第一块
+    const plan = [];
+    if (list.includes('hand') && (S.lv.hand < 4 || Math.random() < .4)) plan.push('hand');
+    pickList.filter(k => k !== 'hand').forEach(k => plan.length < 4 && plan.push(k));
+    if (plan.length < 3) list.forEach(k => plan.length < 4 && !plan.includes(k) && plan.push(k));
+    return plan;
+  }
+  let plan = todayPlan();
+  const minutes = k => ({ intro: 4, hand: 3, rhyme: 4, image: 3, mental: 5, mul: 4 })[k];
+  const lvOf = k => S.lv[k] || 0;
+
+  function renderHome() {
+    $('#streak').textContent = streak();
+    const doneToday = S.days[todayKey()] || 0;
+    $('#planTitle').textContent = doneToday ? `今日已完成 ${doneToday} 次` : '今日训练';
+    $('#planTime').textContent = `约 ${plan.reduce((a, k) => a + minutes(k), 0)} 分钟 · ${plan.length} 项`;
+    $('#start').textContent = doneToday ? '再练一轮' : '开始今天的训练';
+    const bl = $('#blocks'); bl.innerHTML = '';
+    plan.forEach((k, i) => bl.appendChild(h(`<li><span class="n">${i + 1}</span><span><b>${TRACKS[k].name}</b><small>${TRACKS[k].levels[lvOf(k)].txt}</small></span><span class="lv">${k === 'intro' ? '新手' : 'Lv ' + (lvOf(k) + 1)}</span></li>`)));
+    $('#place').hidden = S.sessions > 0 || !!S.placed;
+
+    // 热力
+    const heat = $('#heat'); heat.innerHTML = '';
+    const d = new Date(); d.setDate(d.getDate() - 27);
+    for (let i = 0; i < 28; i++) {
+      const c = S.days[dkey(d)] || 0;
+      heat.appendChild(h(`<i class="${c >= 3 ? 'l3' : c === 2 ? 'l2' : c === 1 ? 'l1' : ''} ${i === 27 ? 'today' : ''}" title="${dkey(d)}：${c} 次"></i>`));
+      d.setDate(d.getDate() + 1);
+    }
+
+    // 轨道
+    const tr = $('#tracks'); tr.innerHTML = '';
+    ORDER.forEach(k => {
+      const T = TRACKS[k], lv = S.lv[k], open = unlocked(k);
+      const el = h(`<div class="track ${open ? '' : 'locked'}"><div class="top"><b>${T.name}</b><span>目标：${T.goal}</span></div>
+        <div class="steps">${T.levels.map((_, i) => `<i class="${i <= lv && open ? 'on' : ''}"></i>`).join('')}</div>
+        <div class="now"><span>${open ? `Lv ${lv + 1} / ${T.levels.length} · ${T.levels[lv].txt}` : lockTxt(k)}</span>${open ? '<button>单练这项</button>' : ''}</div>${open ? spark(k) : ''}</div>`);
+      if (open) el.querySelector('button').onclick = () => runSession([k]);
+      tr.appendChild(el);
+    });
+
+    // 路线
+    const phases = [
+      { n: '筑基', wk: '1–4 周', t: '拨珠手感 + 全部口诀', done: () => S.lv.rhyme >= 4 },
+      { n: '成像', wk: '5–12 周', t: '珠像 4 位，一位数闪算', done: () => S.lv.image >= 4 && S.lv.mental >= 4 },
+      { n: '提速', wk: '13–24 周', t: '3 位心算，乘法上盘', done: () => S.lv.mental >= 8 },
+      { n: '目标', wk: '25–36 周', t: '5 位数 3 笔，3 位 × 1 位', done: () => S.lv.mental >= 12 },
+    ];
+    const cur = phases.findIndex(p => !p.done());
+    const ph = $('#phases'); ph.innerHTML = '';
+    phases.forEach((p, i) => ph.appendChild(h(`<div class="phase ${i === cur ? 'cur' : ''}"><span class="wk">${p.wk}</span><b>${p.n}${p.done() ? ' ✓' : ''}</b><span>${p.t}</span></div>`)));
+    const total = ORDER.reduce((a, k) => a + TRACKS[k].levels.length - 1, 0);
+    const got = ORDER.reduce((a, k) => a + S.lv[k], 0);
+    $('#eta').textContent = `总进度 ${Math.round(got / total * 100)}%。已训练 ${S.sessions} 轮。成年人每天坚持 15–20 分钟，大约 6–9 个月能稳定算五位数加减；五位 × 五位那种乘法是比赛级水平，不作为目标。`;
+    $('#mute').textContent = Z.isMuted() ? '声音：关' : '声音：开';
+  }
+  // 最近 14 次训练的正确率小柱图（单一序列，标题即图例）
+  function spark(k) {
+    const hs = (S.hist[k] || []).slice(-14);
+    if (!hs.length) return '<div class="spark-empty">练过之后，这里显示最近 14 次的正确率</div>';
+    const W = 14 * 12, H = 36;
+    const bars = hs.map((x, i) => {
+      const bh = Math.max(3, Math.round(x.acc * (H - 4)));
+      const cls = x.acc >= .9 ? 'hi' : x.acc < .6 ? 'lo' : '';
+      return `<rect class="${cls}" x="${i * 12 + 1}" y="${H - bh}" width="9" height="${bh}" rx="2"><title>${x.d} · ${Math.round(x.acc * 100)}% · Lv ${x.lv + 1}</title></rect>`;
+    }).join('');
+    const last = hs[hs.length - 1];
+    const avg = Math.round(hs.reduce((a, x) => a + x.acc, 0) / hs.length * 100);
+    return `<div class="spark"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="最近 ${hs.length} 次正确率，平均 ${avg}%"><line x1="0" x2="${W}" y1="${H - Math.round(.9 * (H - 4))}" y2="${H - Math.round(.9 * (H - 4))}" class="goal"/>${bars}</svg><span><b class="num">${Math.round(last.acc * 100)}%</b> 最近一次<br><span class="num">${avg}%</span> 平均 · 虚线 90% 升级线</span></div>`;
+  }
+  function lockTxt(k) { return { image: '拨珠手感到 Lv 2 后开启', mental: '口诀反应到 Lv 3 后开启', mul: '心算到 Lv 7 后开启' }[k] || ''; }
+
+  // 口诀表
+  function rhymeTable(op) {
+    let html = '<table><thead><tr><th>' + (op === '+' ? '加' : '减') + '</th><th>直接</th><th>五的补数</th><th>十的补数</th><th>破五进十 / 退十补五</th></tr></thead><tbody>';
+    for (let b = 1; b <= 9; b++) {
+      const by = { direct: '', five: '', ten: '', mix: '' };
+      for (let a = 0; a <= 9; a++) { const m = Z.methodOf(a, b, op); if (!by[m]) by[m] = Z.rhyme(a, b, op); }
+      html += `<tr><td class="num">${op === '+' ? '+' : '−'}${b}</td><td class="r">${by.direct}</td><td class="r">${by.five}</td><td class="r">${by.ten}</td><td class="r">${by.mix}</td></tr>`;
+    }
+    return html + '</tbody></table>';
+  }
+  $('#tblAdd').innerHTML = rhymeTable('+');
+  $('#tblSub').innerHTML = rhymeTable('-');
+  $('#start').onclick = () => runSession(plan);
+  $('#place').onclick = () => runSession(['rhyme', 'image', 'mental'], { placement: true });
+  $('#mute').onclick = () => { Z.setMuted(!Z.isMuted()); renderHome(); };
+  $('#reset').onclick = e => {
+    if (e.target.dataset.sure) { S = fresh(); persist(); plan = todayPlan(); renderHome(); e.target.dataset.sure = ''; e.target.textContent = '清空记录'; }
+    else { e.target.dataset.sure = '1'; e.target.textContent = '再点一次确认清空'; }
+  };
+  // 备份码：MRYP1: + base64(JSON)
+  const PREFIX = 'MRYP1:';
+  const enc = o => PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  const dec = s => { s = s.trim(); if (!s.startsWith(PREFIX)) throw 0; const o = JSON.parse(decodeURIComponent(escape(atob(s.slice(PREFIX.length))))); if (!o || !o.lv) throw 0; return o; };
+  const bk = { panel: $('#bkPanel'), text: $('#bkText'), msg: $('#bkMsg'), go: $('#bkDo') };
+  $('#bkOut').onclick = () => {
+    const code = enc(S);
+    bk.panel.hidden = false; bk.go.hidden = true; bk.text.readOnly = true; bk.text.value = code;
+    const fallback = () => { bk.text.focus(); bk.text.select(); bk.msg.textContent = '已选中备份码，请长按复制，存到备忘录或发给自己。'; };
+    try { navigator.clipboard.writeText(code).then(() => { bk.msg.textContent = '已复制。存到备忘录或发给自己即可。'; }, fallback); } catch (e) { fallback(); }
+  };
+  $('#bkIn').onclick = () => {
+    bk.panel.hidden = false; bk.go.hidden = false; bk.text.readOnly = false; bk.text.value = '';
+    bk.msg.textContent = '把备份码粘贴到上面。恢复会覆盖这台设备上现在的进度。'; bk.text.focus();
+  };
+  bk.go.onclick = () => {
+    try {
+      const o = dec(bk.text.value);
+      S = Object.assign(fresh(), o); persist(); plan = todayPlan(); renderHome();
+      bk.msg.textContent = `已恢复：共训练 ${S.sessions} 轮。`; bk.go.hidden = true;
+    } catch (e) { bk.msg.textContent = '这不是有效的备份码。请确认复制完整，以 MRYP1: 开头。'; }
+  };
+
+  /* ===== 训练 ===== */
+  let cleanup = [];
+  const stage = () => $('#tstage');
+  function clean() { cleanup.forEach(f => f()); cleanup = []; }
+  $('#quit').onclick = () => { clean(); $('#train').hidden = true; document.body.style.overflow = ''; renderHome(); };
+  function mkAbacus(host, rods, opts) {
+    const box = h('<div class="ab-host"></div>'); host.appendChild(box);
+    const ab = Z.abacus(box, Object.assign({ rods }, opts));
+    ab.svg.style.maxWidth = (rods * 64 + 30) + 'px';
+    return ab;
+  }
+
+  function runSession(list, opt) {
+    opt = opt || {};
+    $('#train').hidden = false; document.body.style.overflow = 'hidden';
+    const results = [];
+    let bi = 0;
+    const segs = $('#segs');
+    segs.innerHTML = list.map(() => '<i></i>').join('');
+    const setSeg = p => [...segs.children].forEach((s, i) => { s.className = i < bi ? 'done' : i === bi ? 'cur' : ''; if (i === bi) s.style.setProperty('--p', p + '%'); });
+    function nextBlock() {
+      clean();
+      if (bi >= list.length) return summary();
+      setSeg(0);
+      const k = list[bi], T = TRACKS[k];
+      const lv = opt.placement ? PROBE[k] : lvOf(k);
+      const L = Object.assign({}, T.levels[lv], opt.placement ? { n: 5 } : {});
+      const st = stage(); st.innerHTML = '';
+      const head = opt.placement ? `定级 ${bi + 1} / ${list.length} · 5 题` : k === 'intro' ? '新手第一课' : `第 ${bi + 1} / ${list.length} 项 · Lv ${lv + 1}`;
+      st.appendChild(h(`<div class="intro"><div class="k">${head}</div><h2>${T.name}：${L.txt}</h2><ul>${T.tips.map(t => `<li>${t}</li>`).join('')}</ul></div>`));
+      // 新内容先看演示：第一次遇到这一级时自动播放，之后可手动点开
+      const key = k + ':' + lv;
+      if (!opt.placement && k !== 'intro' && DEMO[k]) {
+        const isNew = !S.seen[key];
+        const holder = h('<div></div>'); st.appendChild(holder);
+        const play = () => { holder.innerHTML = ''; showDemo(holder, k, L, isNew); };
+        if (isNew) { S.seen[key] = 1; persist(); play(); }
+        else { const db = h('<button class="btn ghost wide">看一遍演示</button>'); db.onclick = play; holder.appendChild(db); }
+      }
+      const b = h('<button class="btn wide">开始</button>');
+      b.onclick = () => { clean(); st.innerHTML = ''; BLOCK[k](L, (right, total) => { results.push({ k, right, total, lv }); bi++; nextBlock(); }, p => setSeg(p)); };
+      st.appendChild(b);
+    }
+    function summary() {
+      [...segs.children].forEach(s => s.className = 'done');
+      const st = stage(); st.innerHTML = '';
+      st.appendChild(h(opt.placement
+        ? '<div class="intro"><div class="k">定级完成</div><h2>已按你的水平设好起点</h2><p>从明天起，每日训练会从这里开始，并继续按正确率调整。</p></div>'
+        : '<div class="intro"><div class="k">本轮完成</div><h2>今天的训练结果</h2><p>正确率决定每条轨道明天的难度。</p></div>'));
+      const box = h('<div class="summary"></div>');
+      results.forEach(r => {
+        const acc = r.total ? r.right / r.total : 0;
+        if (r.k === 'intro') {
+          S.intro = true;
+          box.appendChild(h('<div class="row"><span><b>入门课</b><br><small>认识了算盘的结构</small></span><span class="chg up">完成</span></div>'));
+          return;
+        }
+        const before = lvOf(r.k);
+        if (opt.placement) {
+          S.lv[r.k] = acc >= .8 ? PROBE[r.k] : acc >= .5 ? Math.floor(PROBE[r.k] / 2) : 0;
+          if (acc >= .5) { S.intro = true; S.lv.hand = Math.max(S.lv.hand, 2); }
+        } else if (acc >= .9) S.lv[r.k] = Math.min(TRACKS[r.k].levels.length - 1, before + 1);
+        else if (acc < .6) S.lv[r.k] = Math.max(0, before - 1);
+        (S.hist[r.k] = S.hist[r.k] || []).push({ d: todayKey(), acc, lv: r.lv });
+        if (S.hist[r.k].length > 40) S.hist[r.k].shift();
+        const d = S.lv[r.k] - before;
+        const chg = opt.placement ? `定为 Lv ${S.lv[r.k] + 1}` : d > 0 ? `升到 Lv ${S.lv[r.k] + 1}` : d < 0 ? `降到 Lv ${S.lv[r.k] + 1}` : `保持 Lv ${before + 1}`;
+        box.appendChild(h(`<div class="row"><span><b>${TRACKS[r.k].name}</b><br><small class="num">${r.right} / ${r.total} · ${Math.round(acc * 100)}%</small></span><span class="chg ${opt.placement || d > 0 ? 'up' : d < 0 ? 'down' : 'same'}">${chg}</span></div>`));
+      });
+      if (opt.placement) S.sessions = Math.max(S.sessions, 0);
+      else { S.days[todayKey()] = (S.days[todayKey()] || 0) + 1; S.sessions++; }
+      S.placed = S.placed || !!opt.placement;
+      persist();
+      plan = todayPlan();
+      st.appendChild(box);
+      const b = h('<button class="btn wide">回到首页</button>'); b.onclick = () => $('#quit').click(); st.appendChild(b);
+    }
+    nextBlock();
+  }
+
+  /* ===== 演示：在算盘上自动拨给你看 ===== */
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  // 乘法拆成逐位乘积，从高位到低位：[{txt, add}]
+  function mulParts(a, b) {
+    const A = String(a).split('').map(Number), B = String(b).split('').map(Number), out = [];
+    A.forEach((x, i) => B.forEach((y, j) => {
+      const p = A.length - 1 - i + B.length - 1 - j;
+      out.push({ txt: `${x}×${y}=${x * y}`, add: x * y * Math.pow(10, p) });
+    }));
+    return out;
+  }
+  // 回放一串加减（或乘积）在算盘上的变化
+  async function replaySums(ab, cap, items, alive) {
+    let v = 0; ab.set(0);
+    for (const it of items) {
+      if (!alive()) return;
+      v += it.add;
+      cap.innerHTML = `${it.txt}<small>盘上 → ${v}</small>`;
+      ab.set(v); Z.tick(1600);
+      await wait(1300);
+    }
+  }
+  const DEMO = {
+    async hand(ab, cap, L, alive) {
+      for (let i = 0; i < 3 && alive(); i++) { const v = Z.nDigit(L.d); ab.set(0); cap.innerHTML = `拨出 ${v}<small>从最高位开始</small>`; await wait(700); const s = String(v); for (let j = 1; j <= s.length && alive(); j++) { ab.set(+s.slice(0, j) * Math.pow(10, s.length - j)); Z.tick(1700); await wait(550); } await wait(900); }
+    },
+    async rhyme(ab, cap, L, alive) {
+      const c = Z.genChain({ steps: 4, methods: L.m, focus: L.f, max: 99 });
+      ab.set(c.start); cap.innerHTML = `盘上 ${c.start}`; await wait(1200);
+      for (const s of c.seq) {
+        if (!alive()) return;
+        cap.innerHTML = `${s.op === '+' ? '+' : '−'} ${s.b}　${Z.rhyme(s.from % 10, s.b, s.op)}<small>${Z.explain(s.from % 10, s.b, s.op)}</small>`;
+        await wait(900);
+        for (const mid of Z.microSteps(s.from, s.b, s.op)) { if (!alive()) return; ab.set(mid); Z.tick(1700); await wait(750); }
+        await wait(1400);
+      }
+    },
+    async image(ab, cap, L, alive, box) {
+      for (let i = 0; i < 2 && alive(); i++) {
+        const v = Z.nDigit(L.d); ab.set(v); box.classList.remove('hidden-ab'); cap.innerHTML = '记住珠形<small>先看上珠，再看下珠</small>'; await wait(L.ms);
+        box.classList.add('hidden-ab'); cap.innerHTML = '闭眼“看”它……'; await wait(1500);
+        box.classList.remove('hidden-ab'); cap.innerHTML = `${v}<small>对照一下刚才脑中的样子</small>`; await wait(1800);
+      }
+    },
+    async mental(ab, cap, L, alive) {
+      const m = Z.genMulti(L.d, L.t, true);
+      cap.innerHTML = '脑中的算盘这样变化'; await wait(900);
+      await replaySums(ab, cap, m.nums.map((x, i) => ({ txt: (i ? (x < 0 ? '− ' : '+ ') : '') + Math.abs(x), add: x })), alive);
+      if (alive()) cap.innerHTML = `= ${m.answer}<small>只记盘面，看过的数字就忘掉</small>`;
+      await wait(1500);
+    },
+    async mul(ab, cap, L, alive) {
+      const m = Z.genMul(L.a, L.b);
+      cap.innerHTML = `${m.a} × ${m.b}<small>拆成逐位相乘，错位加到盘上</small>`; await wait(1500);
+      await replaySums(ab, cap, mulParts(m.a, m.b).map(p => ({ txt: `${p.txt} → +${p.add}`, add: p.add })), alive);
+      if (alive()) cap.innerHTML = `= ${m.answer}`;
+      await wait(1500);
+    },
+  };
+  function showDemo(holder, k, L, isNew) {
+    const rods = { hand: L.d + 1, rhyme: 3, image: (L.d || 2) + 1, mental: (L.d || 1) + 2, mul: (L.a || 2) + (L.b || 1) + 1 }[k];
+    const box = h(`<div class="demo"><div class="k"><span>${isNew ? '新内容 · 先看一遍' : '演示'}</span><span>自动播放</span></div></div>`);
+    holder.appendChild(box);
+    const ab = mkAbacus(box, Math.max(2, rods), { interactive: false, labels: false });
+    const cap = h('<div class="demo-cap"></div>'); box.appendChild(cap);
+    let on = true; cleanup.push(() => { on = false; });
+    (async () => { while (on) { await DEMO[k](ab, cap, L, () => on, box); await wait(800); } })();
+  }
+
+  /* 每块训练：done(right,total)，prog(百分比) */
+  const BLOCK = {
+    intro(L, done, prog) {
+      const st = stage();
+      const pages = [
+        { title: '一档就是一位数', body: '横梁上方的<b>上珠一颗代表 5</b>，下方的<b>下珠每颗代表 1</b>。珠子靠近横梁才算数。下面盘上是 7：上珠落下（5），推上两颗下珠（2）。', show: 7 },
+        { title: '自己点一点', body: '点下珠，它和它上面的珠子一起被推到横梁；再点一次就拨下来。点上珠就让它落到横梁或回到上面。随便玩一会儿，看数字怎么变。', play: true },
+      ];
+      let p = 0;
+      const targets = [3, 5, 8, 9, 27, 408];
+      function page() {
+        clean(); st.innerHTML = ''; prog(p / (pages.length + 1) * 100);
+        if (p >= pages.length) return setTask();
+        const pg = pages[p];
+        st.appendChild(h(`<div class="intro"><h2>${pg.title}</h2><p>${pg.body}</p></div>`));
+        const out = h('<div class="q"><div class="meta">盘上的数</div><div class="big" id="v"></div></div>');
+        const ab = mkAbacus(st, 3, { interactive: !!pg.play, onChange: v => out.querySelector('#v').textContent = v });
+        ab.set(pg.show || 0); out.querySelector('#v').textContent = pg.show || 0;
+        st.appendChild(out);
+        const b = h('<button class="btn wide">继续</button>'); b.onclick = () => { p++; page(); }; st.appendChild(b);
+      }
+      function setTask() {
+        let i = 0;
+        const q = h('<div class="q"><div class="meta" id="m"></div><div class="big" id="b"></div><div class="sub" id="s"></div></div>');
+        st.appendChild(q);
+        const ab = mkAbacus(st, 3, { onChange: v => { if (v === targets[i]) { Z.chime(true); q.querySelector('#s').textContent = '对了'; ab.setInteractive(false); setTimeout(() => { ab.setInteractive(true); i++; prog((pages.length + i / targets.length) / (pages.length + 1) * 100); show(); }, 600); } } });
+        const tl = h('<div class="ab-tools"><button>清盘</button></div>'); tl.firstChild.onclick = () => ab.clear(); st.appendChild(tl);
+        function show() { if (i >= targets.length) return done(targets.length, targets.length); ab.set(0); q.querySelector('#m').textContent = `拨出这个数 · ${i + 1} / ${targets.length}`; q.querySelector('#b').textContent = targets[i]; q.querySelector('#s').textContent = targets[i] >= 10 ? '多位数从左边的高位开始拨' : ''; }
+        show();
+      }
+      page();
+    },
+    hand(L, done, prog) {
+      const N = L.n || 8; let n = 0, right = 0, target, t0;
+      const st = stage();
+      const q = h('<div class="q"><div class="meta" id="m"></div><div class="big" id="b"></div><div class="sub" id="s"></div></div>');
+      st.appendChild(q);
+      const ab = mkAbacus(st, Math.max(3, L.d + 1), { onChange: v => { if (v === target) hitIt(); } });
+      const tl = h('<div class="ab-tools"><button>清盘</button></div>'); tl.firstChild.onclick = () => ab.clear(); st.appendChild(tl);
+      const limit = 2 + L.d * 1.5;
+      function nx() { if (n >= N) return done(right, N); target = Z.nDigit(L.d); ab.set(0); t0 = Date.now(); q.querySelector('#m').textContent = `${n + 1} / ${N} · ${limit} 秒内算达标`; q.querySelector('#b').textContent = target; q.querySelector('#s').textContent = ''; }
+      function hitIt() { const s = (Date.now() - t0) / 1000; const ok = s <= limit; if (ok) right++; n++; prog(n / N * 100); Z.chime(ok); q.querySelector('#s').textContent = `${s.toFixed(1)} 秒${ok ? '' : ' · 慢了'}`; setTimeout(nx, 500); }
+      nx();
+    },
+    rhyme(L, done, prog) {
+      const N = L.n || 12; let n = 0, right = 0, cur, t0, queue = [];
+      const st = stage();
+      const q = h('<div class="q"><div class="meta" id="m"></div><div class="big" id="b"></div><div class="sub" id="s"></div></div>');
+      st.appendChild(q);
+      const fb = h('<div class="fb"></div>');
+      const ab = mkAbacus(st, 3, { onChange: v => { if (cur && v === cur.to) ok(); } });
+      const tl = h('<div class="ab-tools"><button>不会，给我看</button></div>'); st.append(tl, fb);
+      tl.firstChild.onclick = () => { if (!cur) return; const c = cur; cur = null; n++; prog(n / N * 100); Z.chime(false); fb.className = 'fb no'; fb.textContent = Z.explain(c.from % 10, c.b, c.op); animate(c).then(() => setTimeout(nx, 1400)); };
+      async function animate(c) { for (const mid of Z.microSteps(c.from, c.b, c.op)) { await new Promise(r => setTimeout(r, 600)); ab.set(mid); Z.tick(1700); } }
+      function nx() {
+        if (n >= N) return done(right, N);
+        if (!queue.length) { const c = Z.genChain({ steps: 6, methods: L.m, focus: L.f, max: 99 }); ab.set(c.start); queue = c.seq; }
+        cur = queue.shift(); t0 = Date.now(); fb.textContent = '';
+        q.querySelector('#m').textContent = `${n + 1} / ${N} · 盘上 ${cur.from}`;
+        q.querySelector('#b').textContent = (cur.op === '+' ? '+ ' : '− ') + cur.b;
+        q.querySelector('#s').textContent = L.bare ? '' : Z.rhyme(cur.from % 10, cur.b, cur.op);
+      }
+      function ok() { const s = (Date.now() - t0) / 1000; const good = s <= 6; if (good) right++; n++; prog(n / N * 100); Z.chime(good); fb.className = 'fb ' + (good ? 'ok' : 'no'); fb.textContent = good ? `= ${cur.to}` : `= ${cur.to} · ${s.toFixed(1)} 秒，再快一点`; cur = null; setTimeout(nx, 350); }
+      nx();
+    },
+    image(L, done, prog) { answerBlock(L.n || 8, () => { const v = Z.nDigit(L.d); return { peek: v, ms: L.ms, answer: v, rods: L.d + 1 }; }, done, prog); },
+    mental(L, done, prog) {
+      answerBlock(L.n || 8, () => { const m = Z.genMulti(L.d, L.t, true); return L.ms ? { flash: m.nums, ms: L.ms, answer: m.answer } : { stack: m.nums, answer: m.answer }; }, done, prog);
+    },
+    mul(L, done, prog) { answerBlock(L.n || 8, () => { const m = Z.genMul(L.a, L.b); return { text: `${m.a} × ${m.b}`, answer: m.answer, board: L.board, a: m.a, b: m.b }; }, done, prog); },
+  };
+
+  function answerBlock(N, gen, done, prog) {
+    let n = 0, right = 0, cur, locked = true;
+    const st = stage();
+    const q = h('<div class="q"><div class="meta" id="m"></div><div id="b"></div></div>');
+    const area = h('<div></div>');
+    const fb = h('<div class="fb"></div>');
+    const kpHost = h('<div></div>');
+    st.append(q, area, fb, kpHost);
+    const kp = Z.keypad(kpHost, submit); cleanup.push(kp.destroy);
+    let ab = null;
+    function nx() {
+      if (n >= N) return done(right, N);
+      cur = gen(); locked = false; fb.textContent = ''; area.innerHTML = ''; ab = null; kpHost.style.visibility = 'visible';
+      q.querySelector('#m').textContent = `${n + 1} / ${N}`;
+      const b = q.querySelector('#b');
+      if (cur.peek != null) {
+        b.innerHTML = '<div class="big">记住珠形</div>';
+        ab = mkAbacus(area, cur.rods, { interactive: false }); ab.set(cur.peek);
+        setTimeout(() => { if (ab) ab.svg.style.visibility = 'hidden'; b.innerHTML = '<div class="big">是几？</div>'; }, cur.ms);
+      } else if (cur.flash) {
+        b.innerHTML = ''; const fl = h('<div class="flashbox"></div>'); area.appendChild(fl); kpHost.style.visibility = 'hidden'; locked = true;
+        Z.flash(fl, cur.flash, cur.ms).then(() => { kpHost.style.visibility = 'visible'; locked = false; });
+      } else if (cur.stack) {
+        b.innerHTML = '<div class="vstack">' + cur.stack.map((x, i) => `<div>${i ? (x < 0 ? '−' : '+') : ''}&nbsp;${Math.abs(x)}</div>`).join('') + '</div>';
+      } else {
+        b.innerHTML = `<div class="big">${cur.text}</div>`;
+        if (cur.board) { ab = mkAbacus(area, 5, {}); const tl = h('<div class="ab-tools" style="margin-top:8px"><button>清盘</button></div>'); tl.firstChild.onclick = () => ab.clear(); area.appendChild(tl); }
+      }
+    }
+    function submit(v) {
+      if (locked) return; locked = true;
+      const ok = v === cur.answer; if (ok) right++; n++; prog(n / N * 100); Z.chime(ok);
+      fb.className = 'fb ' + (ok ? 'ok' : 'no');
+      fb.textContent = ok ? '正确' : `答案 ${cur.answer}` + (cur.flash ? `（${cur.flash.map((x, i) => (i ? (x < 0 ? ' − ' : ' + ') : '') + Math.abs(x)).join('')}）` : '');
+      if (ab && cur.peek != null) ab.svg.style.visibility = 'visible';
+      const nums = cur.flash || cur.stack;
+      if (ok || (!nums && cur.a == null)) { setTimeout(nx, ok ? 600 : 2000); return; }
+      // 答错：可以在算盘上一步步回放正确过程
+      kpHost.style.visibility = 'hidden';
+      const bar = h('<div class="row2"><button class="btn ghost">在算盘上回放</button><button class="btn">下一题</button></div>');
+      fb.after(bar);
+      let on = true; const stopRp = () => { on = false; }; cleanup.push(stopRp);
+      bar.children[0].onclick = () => {
+        area.innerHTML = '';
+        const items = nums
+          ? nums.map((x, i) => ({ txt: (i ? (x < 0 ? '− ' : '+ ') : '') + Math.abs(x), add: x }))
+          : mulParts(cur.a, cur.b).map(p => ({ txt: `${p.txt} → +${p.add}`, add: p.add }));
+        const peak = items.reduce((m, it, i) => { const s = items.slice(0, i + 1).reduce((a, x) => a + x.add, 0); return Math.max(m, s); }, 0);
+        const rab = mkAbacus(area, Math.max(3, String(peak).length + 1), { interactive: false });
+        const cap = h('<div class="demo-cap"></div>'); area.appendChild(cap);
+        bar.children[0].disabled = true;
+        replaySums(rab, cap, items, () => on).then(() => { if (on) { cap.innerHTML = `= ${cur.answer}`; bar.children[0].disabled = false; bar.children[0].textContent = '再回放一次'; } });
+      };
+      bar.children[1].onclick = () => { stopRp(); bar.remove(); nx(); };
+    }
+    nx();
+  }
+
+  renderHome();
+})();
+</script>
+
+<script>
+(function () {
+  // 离线缓存
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
+  // 请求持久存储，降低进度被系统清理的概率
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  var box = document.getElementById('install'), txt = document.getElementById('installTxt'), btn = document.getElementById('installBtn');
+  if (standalone || !box) return;
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (ios) {
+    box.hidden = false;
+    txt.innerHTML = '<b>安装到主屏幕：</b>点 Safari 底部的“分享”按钮，选“添加到主屏幕”。安装后可离线使用。';
+  }
+  var deferred = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); deferred = e;
+    box.hidden = false; btn.hidden = false;
+    txt.innerHTML = '<b>安装成 App：</b>桌面有图标，全屏打开，断网也能练。';
+  });
+  btn.addEventListener('click', function () {
+    if (!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.then(function () { deferred = null; box.hidden = true; });
+  });
+  window.addEventListener('appinstalled', function () { box.hidden = true; });
+})();
+</script>
+</body>
+</html>
